@@ -1,29 +1,46 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iframe Fullscreen</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const { exec } = require('child_process');
+
+const app = express();
+const port = 5000;
+
+// Percorso della directory principale dei documenti
+const documentiPath = path.join(__dirname, 'documenti');
+if (!fs.existsSync(documentiPath)) {
+    fs.mkdirSync(documentiPath, { recursive: true });
+}
+
+/**
+ * Funzione per generare miniature della prima pagina dei PDF
+ * @param {string} pdfPath - Percorso del file PDF
+ * @param {string} imagePath - Percorso dell'immagine PNG
+ */
+function generateThumbnail(pdfPath, imagePath) {
+    const command = `"C:\\Program Files\\ImageMagick-7.1.1-Q16\\magick.exe" convert -thumbnail x300 "${pdfPath}[0]" "${imagePath}"`;
+    console.log(`Esecuzione comando: ${command}`);
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Errore durante la generazione della miniatura: ${error.message}`);
+            console.error(`Dettagli errore: ${stderr}`);
+        } else {
+            console.log(`Miniatura creata con successo: ${imagePath}`);
         }
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-        iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-    </style>
-</head>
-<body>
-    <iframe src="http://95.230.151.73:5000/" allowfullscreen></iframe>
-</body>
-</html>
+    });
+}
+
+/**
+ * Funzione per ottenere i PDF organizzati per cartelle e generare miniature
+ */
+function getPDFsByFolder(dir) {
+    const folders = fs.readdirSync(dir, { withFileTypes: true }).filter(item => item.isDirectory());
+    const result = {};
+
+    folders.forEach(folder => {
+        const folderPath = path.join(dir, folder.name);
+        const files = fs.readdirSync(folderPath).filter(file => file.endsWith('.pdf'));
+
+        result[folder.name] = files.map(file => {
+            const pdfPath = path.join(folderPath, file);
+            const thumbnailPath = path.join(folderPath, file.replace('.pdf', '
