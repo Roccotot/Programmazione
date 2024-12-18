@@ -3,198 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carica e Visualizza PDF</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+    <title>Iframe Fullscreen</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
         }
-        
-        h1 {
-            margin-bottom: 20px;
-        }
-        
-        #upload-container {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .pdf-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-        
-        .pdf-item {
-            width: 200px;
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+        html, body {
+            height: 100%;
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
-        canvas {
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: auto;
-        }
-        
-        .download-button, .delete-button {
-            display: block;
-            text-decoration: none;
-            color: white;
-            padding: 10px 0;
-            text-align: center;
-        }
-        
-        .download-button {
-            background-color: #4CAF50;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .download-button:hover {
-            background-color: #45a049;
-        }
-
-        .delete-button {
-            background-color: #e74c3c;
-        }
-
-        .delete-button:hover {
-            background-color: #c0392b;
-        }
-
-        .buttons-container {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            margin-bottom: 5px;
+            height: 100%;
+            border: none;
         }
     </style>
 </head>
 <body>
-
-<h1>Carica e Visualizza PDF</h1>
-
-<div id="upload-container">
-    <input type="file" id="fileInput" accept="application/pdf">
-</div>
-
-<div class="pdf-container" id="pdfContainer"></div>
-
-<script>
-    const fileInput = document.getElementById('fileInput');
-    const pdfContainer = document.getElementById('pdfContainer');
-
-    fileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file && file.type === 'application/pdf') {
-            const formData = new FormData();
-            formData.append('pdfFile', file);
-            
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.filePath) {
-                    loadPDFs();
-                }
-            })
-            .catch(error => console.error('Errore:', error));
-        } else {
-            alert('Seleziona un file PDF valido.');
-        }
-    });
-
-    function loadPDFs() {
-        fetch('/get-pdf-list')
-            .then(response => response.json())
-            .then(data => {
-                pdfContainer.innerHTML = '';
-                data.pdfFiles.forEach(filePath => displayPDF(filePath));
-            })
-            .catch(error => console.error('Errore durante il caricamento della lista dei PDF:', error));
-    }
-
-    function displayPDF(filePath) {
-        const pdfItem = document.createElement('div');
-        pdfItem.classList.add('pdf-item');
-        
-        const canvas = document.createElement('canvas');
-        pdfItem.appendChild(canvas);
-
-        const buttonsContainer = document.createElement('div');
-        buttonsContainer.classList.add('buttons-container');
-
-        // Bottone Scarica
-        const downloadButton = document.createElement('a');
-        downloadButton.classList.add('download-button');
-        downloadButton.textContent = 'Scarica PDF';
-        downloadButton.href = filePath;
-        downloadButton.download = filePath.split('/').pop();
-        buttonsContainer.appendChild(downloadButton);
-
-        // Bottone Elimina
-        const deleteButton = document.createElement('button');
-        deleteButton.classList.add('delete-button');
-        deleteButton.textContent = 'Elimina PDF';
-        deleteButton.addEventListener('click', () => {
-            const confirmDelete = confirm("Sei sicuro di voler eliminare questo PDF?");
-            if (!confirmDelete) {
-                // Se l'utente preme Annulla, non fare nulla
-                return;
-            }
-            
-            // Se l'utente conferma, procedi con la richiesta di eliminazione
-            fetch('/delete-pdf', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filePath: filePath })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    loadPDFs();
-                } else {
-                    alert('Impossibile eliminare il PDF');
-                }
-            })
-            .catch(error => console.error('Errore durante l\'eliminazione del PDF:', error));
-        });
-        buttonsContainer.appendChild(deleteButton);
-
-        pdfItem.appendChild(buttonsContainer);
-        pdfContainer.appendChild(pdfItem);
-        
-        const canvasContext = canvas.getContext('2d');
-        
-        pdfjsLib.getDocument(filePath).promise.then((pdf) => {
-            pdf.getPage(1).then((page) => {
-                const viewport = page.getViewport({ scale: 0.5 });
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-                
-                const renderContext = {
-                    canvasContext: canvasContext,
-                    viewport: viewport
-                };
-                
-                page.render(renderContext);
-            });
-        }).catch((error) => {
-            console.error('Errore durante la visualizzazione del PDF:', error);
-        });
-    }
-
-    loadPDFs();
-</script>
-
+    <iframe src="http://95.230.151.73:5000/" allowfullscreen></iframe>
 </body>
 </html>
