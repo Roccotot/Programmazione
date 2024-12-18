@@ -1,46 +1,17 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const { exec } = require('child_process');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirect</title>
+</head>
+<body>
+    <h1>Reindirizzamento in corso...</h1>
+    <p>Se non vieni reindirizzato automaticamente, <a href="http://95.230.151.73:5000">clicca qui</a>.</p>
 
-const app = express();
-const port = 5000;
-
-// Percorso della directory principale dei documenti
-const documentiPath = path.join(__dirname, 'documenti');
-if (!fs.existsSync(documentiPath)) {
-    fs.mkdirSync(documentiPath, { recursive: true });
-}
-
-/**
- * Funzione per generare miniature della prima pagina dei PDF
- * @param {string} pdfPath - Percorso del file PDF
- * @param {string} imagePath - Percorso dell'immagine PNG
- */
-function generateThumbnail(pdfPath, imagePath) {
-    const command = `"C:\\Program Files\\ImageMagick-7.1.1-Q16\\magick.exe" convert -thumbnail x300 "${pdfPath}[0]" "${imagePath}"`;
-    console.log(`Esecuzione comando: ${command}`);
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Errore durante la generazione della miniatura: ${error.message}`);
-            console.error(`Dettagli errore: ${stderr}`);
-        } else {
-            console.log(`Miniatura creata con successo: ${imagePath}`);
-        }
-    });
-}
-
-/**
- * Funzione per ottenere i PDF organizzati per cartelle e generare miniature
- */
-function getPDFsByFolder(dir) {
-    const folders = fs.readdirSync(dir, { withFileTypes: true }).filter(item => item.isDirectory());
-    const result = {};
-
-    folders.forEach(folder => {
-        const folderPath = path.join(dir, folder.name);
-        const files = fs.readdirSync(folderPath).filter(file => file.endsWith('.pdf'));
-
-        result[folder.name] = files.map(file => {
-            const pdfPath = path.join(folderPath, file);
-            const thumbnailPath = path.join(folderPath, file.replace('.pdf', '
+    <script>
+        // Effettua il redirect alla pagina del server Node.js
+        window.location.href = "http://95.230.151.73:5000";
+    </script>
+</body>
+</html>
